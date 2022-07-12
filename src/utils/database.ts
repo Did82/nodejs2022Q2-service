@@ -85,23 +85,23 @@ export class Database {
     };
   }
 
-  public getUsers(): User[] {
+  public async getUsers(): Promise<User[]> {
     return this.db.users;
   }
 
-  public getArtists(): Artist[] {
+  public async getArtists(): Promise<Artist[]> {
     return this.db.artists;
   }
 
-  public getTracks(): Track[] {
+  public async getTracks(): Promise<Track[]> {
     return this.db.tracks;
   }
 
-  public getAlbums(): Album[] {
+  public async getAlbums(): Promise<Album[]> {
     return this.db.albums;
   }
 
-  public getFavorites(): FavoritesRepsonse {
+  public async getFavorites(): Promise<FavoritesRepsonse> {
     const artists = this.db.artists.filter((artist) =>
       this.db.favorites.artists.includes(artist.id),
     );
@@ -114,7 +114,7 @@ export class Database {
     return { artists, albums, tracks };
   }
 
-  public addUser(user: CreateUserDto): User {
+  public async addUser(user: CreateUserDto): Promise<User> {
     const id = uuidv4();
     const createdAt = Date.now();
     const updatedAt = createdAt;
@@ -130,57 +130,55 @@ export class Database {
     return newUser;
   }
 
-  public addArtist(artist: ArtistInput): Artist {
+  public async addArtist(artist: ArtistInput): Promise<Artist> {
     const id = uuidv4();
     const newArtist = { id, ...artist };
     this.db.artists.push(newArtist);
     return newArtist;
   }
 
-  public addTrack(track: TrackInput): Track {
+  public async addTrack(track: TrackInput): Promise<Track> {
     const id = uuidv4();
     const newTrack = { id, ...track };
     this.db.tracks.push(newTrack);
     return newTrack;
   }
 
-  public addAlbum(album: AlbumInput): Album {
+  public async addAlbum(album: AlbumInput): Promise<Album> {
     const id = uuidv4();
     const newAlbum = { id, ...album };
     this.db.albums.push(newAlbum);
     return newAlbum;
   }
 
-  public addFavorite(favorite: Favorites): Favorites {
-    this.db.favorites = { ...this.db.favorites, ...favorite };
-    return this.db.favorites;
-  }
-
-  public getUserById(id: string): User {
+  public async getUserById(id: string): Promise<User> {
     const user: User = this.db.users.find((user) => user.id === id);
     if (!user) throw new Error('User not found');
     return user;
   }
 
-  public getArtistById(id: string): Artist {
+  public async getArtistById(id: string): Promise<Artist> {
     const artist: Artist = this.db.artists.find((artist) => artist.id === id);
     if (!artist) throw new Error('Artist not found');
     return artist;
   }
 
-  public getTrackById(id: string): Track {
+  public async getTrackById(id: string): Promise<Track> {
     const track: Track = this.db.tracks.find((track) => track.id === id);
     if (!track) throw new Error('Track not found');
     return track;
   }
 
-  public getAlbumById(id: string): Album {
+  public async getAlbumById(id: string): Promise<Album> {
     const album: Album = this.db.albums.find((album) => album.id === id);
     if (!album) throw new Error('Album not found');
     return album;
   }
 
-  public updateUser(id: string, updatePassword: UpdatePasswordDto): User {
+  public async updateUser(
+    id: string,
+    updatePassword: UpdatePasswordDto,
+  ): Promise<User> {
     const user: User = this.db.users.find((user) => user.id === id);
     if (!user) throw new Error('User not found');
     if (user.password !== updatePassword.oldPassword)
@@ -192,7 +190,7 @@ export class Database {
     return user;
   }
 
-  public updateArtist(id: string, artist: ArtistInput): Artist {
+  public async updateArtist(id: string, artist: ArtistInput): Promise<Artist> {
     const artistToUpdate: Artist = this.db.artists.find(
       (artist) => artist.id === id,
     );
@@ -205,7 +203,7 @@ export class Database {
     return artistToUpdate;
   }
 
-  public updateTrack(id: string, track: TrackInput): Track {
+  public async updateTrack(id: string, track: TrackInput): Promise<Track> {
     const trackToUpdate: Track = this.db.tracks.find(
       (track) => track.id === id,
     );
@@ -220,7 +218,7 @@ export class Database {
     return trackToUpdate;
   }
 
-  public updateAlbum(id: string, album: AlbumInput): Album {
+  public async updateAlbum(id: string, album: AlbumInput): Promise<Album> {
     const albumToUpdate: Album = this.db.albums.find(
       (album) => album.id === id,
     );
@@ -234,59 +232,65 @@ export class Database {
     return albumToUpdate;
   }
 
-  public deleteUser(id: string): boolean {
+  public async deleteUser(id: string): Promise<boolean> {
     const user: User = this.db.users.find((user) => user.id === id);
     if (!user) throw new Error('User not found');
     this.db.users = this.db.users.filter((u) => u.id !== id);
     return true;
   }
 
-  public deleteArtist(id: string): boolean {
+  public async deleteArtist(id: string): Promise<boolean> {
     const artist: Artist = this.db.artists.find((artist) => artist.id === id);
     if (!artist) throw new Error('Artist not found');
     this.db.artists = this.db.artists.filter((a) => a.id !== id);
     return true;
   }
 
-  public deleteTrack(id: string): boolean {
+  public async deleteTrack(id: string): Promise<boolean> {
     const track: Track = this.db.tracks.find((track) => track.id === id);
     if (!track) throw new Error('Track not found');
     this.db.tracks = this.db.tracks.filter((t) => t.id !== id);
     return true;
   }
 
-  public deleteAlbum(id: string): boolean {
+  public async deleteAlbum(id: string): Promise<boolean> {
     const album: Album = this.db.albums.find((album) => album.id === id);
     if (!album) throw new Error('Album not found');
     this.db.albums = this.db.albums.filter((a) => a.id !== id);
     return true;
   }
 
-  public addFavoriteTrack(id: string, trackId: string): Favorites {
+  public async addFavoriteTrack(id: string, trackId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.tracks = { ...favorite.tracks, [trackId]: id };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 
-  public addFavoriteAlbum(id: string, albumId: string): Favorites {
+  public async addFavoriteAlbum(id: string, albumId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.albums = { ...favorite.albums, [albumId]: id };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 
-  public addFavoriteArtist(id: string, artistId: string): Favorites {
+  public async addFavoriteArtist(
+    id: string,
+    artistId: string,
+  ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.artists = { ...favorite.artists, [artistId]: id };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 
-  public deleteFavoriteArtist(id: string, artistId: string): Favorites {
+  public async deleteFavoriteArtist(
+    id: string,
+    artistId: string,
+  ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.artists = { ...favorite.artists };
@@ -295,10 +299,13 @@ export class Database {
     delete favorite.artists[artistId];
     favorite.artists = { ...favorite.artists };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 
-  public deleteFavoriteAlbum(id: string, albumId: string): Favorites {
+  public async deleteFavoriteAlbum(
+    id: string,
+    albumId: string,
+  ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.albums = { ...favorite.albums };
@@ -307,10 +314,13 @@ export class Database {
     delete favorite.albums[albumId];
     favorite.albums = { ...favorite.albums };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 
-  public deleteFavoriteTrack(id: string, trackId: string): Favorites {
+  public async deleteFavoriteTrack(
+    id: string,
+    trackId: string,
+  ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite) throw new Error('Favorites not found');
     favorite.tracks = { ...favorite.tracks };
@@ -319,6 +329,6 @@ export class Database {
     delete favorite.tracks[trackId];
     favorite.tracks = { ...favorite.tracks };
     this.db.favorites = favorite;
-    return favorite;
+    return true;
   }
 }
