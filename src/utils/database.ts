@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { UserEntity } from '../user/entities/user.entity';
 
 interface CreateUserDto {
   login: string;
@@ -64,13 +66,25 @@ interface FavoritesRepsonse {
   tracks: Track[];
 }
 
-export class Database {
-  private db: {
-    users: User[];
-    artists: Artist[];
-    tracks: Track[];
-    albums: Album[];
-    favorites: Favorites;
+interface DB {
+  users: User[];
+  artists: Artist[];
+  albums: Album[];
+  tracks: Track[];
+  favorites: Favorites;
+}
+
+class Database {
+  private db: DB = {
+    users: [],
+    artists: [],
+    albums: [],
+    tracks: [],
+    favorites: {
+      artists: [],
+      albums: [],
+      tracks: [],
+    },
   };
 
   constructor() {
@@ -118,14 +132,21 @@ export class Database {
     const id = uuidv4();
     const createdAt = Date.now();
     const updatedAt = createdAt;
-    const version = 0;
-    const newUser = {
+    const version = 1;
+    // const newUser = {
+    //   id,
+    //   createdAt,
+    //   updatedAt,
+    //   version,
+    //   ...user,
+    // };
+    const newUser: UserEntity = new UserEntity({
       id,
       createdAt,
       updatedAt,
       version,
       ...user,
-    };
+    });
     this.db.users.push(newUser);
     return newUser;
   }
@@ -153,25 +174,28 @@ export class Database {
 
   public async getUserById(id: string): Promise<User> {
     const user: User = this.db.users.find((user) => user.id === id);
-    if (!user) throw new Error('User not found');
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
   }
 
   public async getArtistById(id: string): Promise<Artist> {
     const artist: Artist = this.db.artists.find((artist) => artist.id === id);
-    if (!artist) throw new Error('Artist not found');
+    if (!artist)
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     return artist;
   }
 
   public async getTrackById(id: string): Promise<Track> {
     const track: Track = this.db.tracks.find((track) => track.id === id);
-    if (!track) throw new Error('Track not found');
+    if (!track)
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     return track;
   }
 
   public async getAlbumById(id: string): Promise<Album> {
     const album: Album = this.db.albums.find((album) => album.id === id);
-    if (!album) throw new Error('Album not found');
+    if (!album)
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     return album;
   }
 
@@ -180,9 +204,12 @@ export class Database {
     updatePassword: UpdatePasswordDto,
   ): Promise<User> {
     const user: User = this.db.users.find((user) => user.id === id);
-    if (!user) throw new Error('User not found');
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     if (user.password !== updatePassword.oldPassword)
-      throw new Error('Wrong password');
+      throw new HttpException(
+        'Old password is incorrect',
+        HttpStatus.BAD_REQUEST,
+      );
     user.password = updatePassword.newPassword;
     user.updatedAt = Date.now();
     user.version += 1;
@@ -194,7 +221,8 @@ export class Database {
     const artistToUpdate: Artist = this.db.artists.find(
       (artist) => artist.id === id,
     );
-    if (!artistToUpdate) throw new Error('Artist not found');
+    if (!artistToUpdate)
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     artistToUpdate.name = artist.name;
     artistToUpdate.grammy = artist.grammy;
     this.db.artists = this.db.artists.map((artist) =>
@@ -207,7 +235,8 @@ export class Database {
     const trackToUpdate: Track = this.db.tracks.find(
       (track) => track.id === id,
     );
-    if (!trackToUpdate) throw new Error('Track not found');
+    if (!trackToUpdate)
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     trackToUpdate.name = track.name;
     trackToUpdate.artistId = track.artistId;
     trackToUpdate.albumId = track.albumId;
@@ -222,7 +251,8 @@ export class Database {
     const albumToUpdate: Album = this.db.albums.find(
       (album) => album.id === id,
     );
-    if (!albumToUpdate) throw new Error('Album not found');
+    if (!albumToUpdate)
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     albumToUpdate.name = album.name;
     albumToUpdate.year = album.year;
     albumToUpdate.artistId = album.artistId;
@@ -234,35 +264,39 @@ export class Database {
 
   public async deleteUser(id: string): Promise<boolean> {
     const user: User = this.db.users.find((user) => user.id === id);
-    if (!user) throw new Error('User not found');
+    if (!user) return false;
     this.db.users = this.db.users.filter((u) => u.id !== id);
     return true;
   }
 
   public async deleteArtist(id: string): Promise<boolean> {
     const artist: Artist = this.db.artists.find((artist) => artist.id === id);
-    if (!artist) throw new Error('Artist not found');
+    if (!artist)
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     this.db.artists = this.db.artists.filter((a) => a.id !== id);
     return true;
   }
 
   public async deleteTrack(id: string): Promise<boolean> {
     const track: Track = this.db.tracks.find((track) => track.id === id);
-    if (!track) throw new Error('Track not found');
+    if (!track)
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     this.db.tracks = this.db.tracks.filter((t) => t.id !== id);
     return true;
   }
 
   public async deleteAlbum(id: string): Promise<boolean> {
     const album: Album = this.db.albums.find((album) => album.id === id);
-    if (!album) throw new Error('Album not found');
+    if (!album)
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     this.db.albums = this.db.albums.filter((a) => a.id !== id);
     return true;
   }
 
   public async addFavoriteTrack(id: string, trackId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.tracks = { ...favorite.tracks, [trackId]: id };
     this.db.favorites = favorite;
     return true;
@@ -270,7 +304,8 @@ export class Database {
 
   public async addFavoriteAlbum(id: string, albumId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.albums = { ...favorite.albums, [albumId]: id };
     this.db.favorites = favorite;
     return true;
@@ -281,7 +316,8 @@ export class Database {
     artistId: string,
   ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.artists = { ...favorite.artists, [artistId]: id };
     this.db.favorites = favorite;
     return true;
@@ -292,10 +328,12 @@ export class Database {
     artistId: string,
   ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.artists = { ...favorite.artists };
     const artist = favorite.artists[artistId];
-    if (!artist) throw new Error('Artist not found');
+    if (!artist)
+      throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     delete favorite.artists[artistId];
     favorite.artists = { ...favorite.artists };
     this.db.favorites = favorite;
@@ -307,10 +345,12 @@ export class Database {
     albumId: string,
   ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.albums = { ...favorite.albums };
     const album = favorite.albums[albumId];
-    if (!album) throw new Error('Album not found');
+    if (!album)
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     delete favorite.albums[albumId];
     favorite.albums = { ...favorite.albums };
     this.db.favorites = favorite;
@@ -322,13 +362,17 @@ export class Database {
     trackId: string,
   ): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
-    if (!favorite) throw new Error('Favorites not found');
+    if (!favorite)
+      throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
     favorite.tracks = { ...favorite.tracks };
     const track = favorite.tracks[trackId];
-    if (!track) throw new Error('Track not found');
+    if (!track)
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     delete favorite.tracks[trackId];
     favorite.tracks = { ...favorite.tracks };
     this.db.favorites = favorite;
     return true;
   }
 }
+
+export const db = new Database();
