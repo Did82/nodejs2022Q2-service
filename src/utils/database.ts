@@ -181,15 +181,17 @@ export class Database {
 
   public async getTrackById(id: string): Promise<Track> {
     const track: Track = this.db.tracks.find((track) => track.id === id);
-    if (!track)
+    if (!track) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    }
     return track;
   }
 
   public async getAlbumById(id: string): Promise<Album> {
     const album: Album = this.db.albums.find((album) => album.id === id);
-    if (!album)
+    if (!album) {
       throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    }
     return album;
   }
 
@@ -199,11 +201,12 @@ export class Database {
   ): Promise<User> {
     const user: User = this.db.users.find((user) => user.id === id);
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    if (user.password !== updatePassword.oldPassword)
+    if (user.password !== updatePassword.oldPassword) {
       throw new HttpException(
         'Old password is incorrect',
         HttpStatus.FORBIDDEN,
       );
+    }
     user.password = updatePassword.newPassword;
     user.updatedAt = Date.now();
     user.version += 1;
@@ -246,8 +249,9 @@ export class Database {
     const albumToUpdate: Album = this.db.albums.find(
       (album) => album.id === id,
     );
-    if (!albumToUpdate)
+    if (!albumToUpdate) {
       throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    }
     albumToUpdate.name = album.name;
     albumToUpdate.year = album.year;
     albumToUpdate.artistId = album.artistId;
