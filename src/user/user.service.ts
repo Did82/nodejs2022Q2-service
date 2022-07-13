@@ -2,18 +2,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
-import { db } from '../utils/database';
+import { Database } from '../utils/database';
 
 @Injectable()
 export class UserService {
-  private db;
-  constructor() {
-    this.db = db;
+  // private db;
+  constructor(private readonly db: Database) {
+    // this.db = db;
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
-    // const newUser = await this.db.addUser(createUserDto);
-    // return new UserEntity(newUser);
     return await this.db.addUser(createUserDto);
   }
 

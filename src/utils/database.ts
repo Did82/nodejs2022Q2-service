@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 
 interface CreateUserDto {
@@ -74,7 +74,8 @@ interface DB {
   favorites: Favorites;
 }
 
-class Database {
+@Injectable()
+export class Database {
   private db: DB = {
     users: [],
     artists: [],
@@ -133,13 +134,6 @@ class Database {
     const createdAt = Date.now();
     const updatedAt = createdAt;
     const version = 1;
-    // const newUser = {
-    //   id,
-    //   createdAt,
-    //   updatedAt,
-    //   version,
-    //   ...user,
-    // };
     const newUser: UserEntity = new UserEntity({
       id,
       createdAt,
@@ -208,7 +202,7 @@ class Database {
     if (user.password !== updatePassword.oldPassword)
       throw new HttpException(
         'Old password is incorrect',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.FORBIDDEN,
       );
     user.password = updatePassword.newPassword;
     user.updatedAt = Date.now();
@@ -221,8 +215,9 @@ class Database {
     const artistToUpdate: Artist = this.db.artists.find(
       (artist) => artist.id === id,
     );
-    if (!artistToUpdate)
+    if (!artistToUpdate) {
       throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
+    }
     artistToUpdate.name = artist.name;
     artistToUpdate.grammy = artist.grammy;
     this.db.artists = this.db.artists.map((artist) =>
@@ -274,6 +269,15 @@ class Database {
     if (!artist)
       throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
     this.db.artists = this.db.artists.filter((a) => a.id !== id);
+    this.db.tracks = this.db.tracks.map((track) =>
+      track.artistId === id ? { ...track, artistId: null } : track,
+    );
+    this.db.albums = this.db.albums.map((album) =>
+      album.artistId === id ? { ...album, artistId: null } : album,
+    );
+    this.db.favorites.artists = this.db.favorites.artists.filter(
+      (artistId) => artistId !== id,
+    );
     return true;
   }
 
@@ -282,6 +286,9 @@ class Database {
     if (!track)
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
     this.db.tracks = this.db.tracks.filter((t) => t.id !== id);
+    this.db.favorites.tracks = this.db.favorites.tracks.filter(
+      (trackId) => trackId !== id,
+    );
     return true;
   }
 
@@ -290,6 +297,12 @@ class Database {
     if (!album)
       throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
     this.db.albums = this.db.albums.filter((a) => a.id !== id);
+    this.db.tracks = this.db.tracks.map((track) =>
+      track.albumId === id ? { ...track, albumId: null } : track,
+    );
+    this.db.favorites.albums = this.db.favorites.albums.filter(
+      (albumId) => albumId !== id,
+    );
     return true;
   }
 
