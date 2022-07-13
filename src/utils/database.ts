@@ -310,84 +310,89 @@ export class Database {
     return true;
   }
 
-  public async addFavoriteTrack(id: string, trackId: string): Promise<boolean> {
+  public async addFavoriteTrack(trackId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.tracks = { ...favorite.tracks, [trackId]: id };
+    if (!this.db.tracks.find((track) => track.id === trackId)) {
+      throw new HttpException(
+        'Track not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (favorite.tracks.includes(trackId)) return true;
+    favorite.tracks.push(trackId);
     this.db.favorites = favorite;
     return true;
   }
 
-  public async addFavoriteAlbum(id: string, albumId: string): Promise<boolean> {
+  public async addFavoriteAlbum(albumId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.albums = { ...favorite.albums, [albumId]: id };
+    if (!this.db.albums.find((album) => album.id === albumId)) {
+      throw new HttpException(
+        'Album not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (favorite.albums.includes(albumId)) return true;
+    favorite.albums.push(albumId);
     this.db.favorites = favorite;
     return true;
   }
 
-  public async addFavoriteArtist(
-    id: string,
-    artistId: string,
-  ): Promise<boolean> {
+  public async addFavoriteArtist(artistId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.artists = { ...favorite.artists, [artistId]: id };
+    if (!this.db.artists.find((artist) => artist.id === artistId)) {
+      throw new HttpException(
+        'Artist not found',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (favorite.artists.includes(artistId)) return true;
+    favorite.artists.push(artistId);
     this.db.favorites = favorite;
     return true;
   }
 
-  public async deleteFavoriteArtist(
-    id: string,
-    artistId: string,
-  ): Promise<boolean> {
+  public async deleteFavoriteArtist(artistId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.artists = { ...favorite.artists };
-    const artist = favorite.artists[artistId];
-    if (!artist)
+    if (!this.db.artists.find((artist) => artist.id === artistId)) {
       throw new HttpException('Artist not found', HttpStatus.NOT_FOUND);
-    delete favorite.artists[artistId];
-    favorite.artists = { ...favorite.artists };
-    this.db.favorites = favorite;
+    }
+    if (!favorite.artists.includes(artistId)) return true;
+    favorite.artists = favorite.artists.filter(
+      (artistId) => artistId !== artistId,
+    );
     return true;
   }
 
-  public async deleteFavoriteAlbum(
-    id: string,
-    albumId: string,
-  ): Promise<boolean> {
+  public async deleteFavoriteAlbum(albumId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.albums = { ...favorite.albums };
-    const album = favorite.albums[albumId];
-    if (!album)
+    if (!this.db.albums.find((album) => album.id === albumId)) {
       throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
-    delete favorite.albums[albumId];
-    favorite.albums = { ...favorite.albums };
-    this.db.favorites = favorite;
+    }
+    if (!favorite.albums.includes(albumId)) return true;
+    favorite.albums = favorite.albums.filter((albumId) => albumId !== albumId);
     return true;
   }
 
-  public async deleteFavoriteTrack(
-    id: string,
-    trackId: string,
-  ): Promise<boolean> {
+  public async deleteFavoriteTrack(trackId: string): Promise<boolean> {
     const favorite: Favorites = this.db.favorites;
     if (!favorite)
       throw new HttpException('Favorites not found', HttpStatus.NOT_FOUND);
-    favorite.tracks = { ...favorite.tracks };
-    const track = favorite.tracks[trackId];
-    if (!track)
+    if (!this.db.tracks.find((track) => track.id === trackId)) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
-    delete favorite.tracks[trackId];
-    favorite.tracks = { ...favorite.tracks };
-    this.db.favorites = favorite;
+    }
+    if (!favorite.tracks.includes(trackId)) return true;
+    favorite.tracks = favorite.tracks.filter((trackId) => trackId !== trackId);
     return true;
   }
 }

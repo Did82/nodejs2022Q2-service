@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Database } from '../utils/database';
+import { db } from '../utils/database';
 import { TrackEntity } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly db: Database) {}
-
+  // constructor(private readonly db: Database) {}
+  private readonly db;
+  constructor() {
+    this.db = db;
+  }
   async create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
     return await this.db.addTrack(createTrackDto);
   }

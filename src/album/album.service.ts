@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Database } from '../utils/database';
+import { db } from '../utils/database';
 import { AlbumEntity } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly db: Database) {}
+  // constructor(private readonly db: Database) {}
+  private readonly db;
+  constructor() {
+    this.db = db;
+  }
 
   async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
     return await this.db.addAlbum(createAlbumDto);
