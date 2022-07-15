@@ -10,7 +10,7 @@
 ```
 git clone {repository URL}
 ```
-**Checkout to 'develop' branch!**
+**Checkout to 'REST_Service' branch!**
 
 ## Installing NPM modules
 
