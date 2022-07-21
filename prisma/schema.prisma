@@ -23,24 +23,37 @@ model Artist {
   id     String  @id @default(uuid())
   name   String
   grammy Boolean
+  Album  Album[]
+  Track  Track[]
+  favs   favs?   @relation(fields: [favsId], references: [id])
+  favsId String?
 }
 
 model Album {
   id       String  @id @default(uuid())
   name     String
   year     Int
-  artistId String? @relation(fields: [artistId], references: [id], onDelete: nullable)
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  Track    Track[]
+  favs     favs?   @relation(fields: [favsId], references: [id])
+  favsId   String?
 }
 
 model Track {
   id       String  @id @default(uuid())
   name     String
   duration Int
-  albumId  String? @relation(fields: [albumId], references: [id], onDelete: nullable)
-  artistId String? @relation(fields: [artistId], references: [id], onDelete: nullable)
+  album    Album?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  albumId  String?
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  favs     favs?   @relation(fields: [favsId], references: [id])
+  favsId   String?
 }
 
 model favs {
+  id      String   @id @default(uuid())
   artists Artist[]
   albums  Album[]
   tracks  Track[]
