@@ -5,6 +5,7 @@ import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import parseYaml from './utils/parseYaml';
 
 const port = process.env.PORT;
+console.log(`Server running on port ${port}`);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

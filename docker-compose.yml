@@ -21,16 +21,17 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    image: did82/nodejs2022q2-service
     container_name: nodejs2022Q2-service
     ports:
       - ${PORT}:${PORT}
-      depends_on:
-        - postgres
-      volumes:
-        - ./src:/app/src
-      restart: always
-      networks:
-        - app-network
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/app/src
+    restart: always
+    networks:
+      - app-network
 volumes:
   db:
     driver: local
