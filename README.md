@@ -4,29 +4,30 @@
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Docker - [Download & Install Docker](https://www.docker.com/community-edition/download/) and the Docker CLI.
 
 ## Downloading
 
 ```
 git clone {repository URL}
 ```
-**Checkout to 'REST_Service' branch!**
-
-## Installing NPM modules
-
-```
-npm install
-```
+**Checkout to 'Containerization_Docker' branch!**
 
 ## Running application
 
 ```
-npm start
+docker compose up
 ```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/api/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Scanning for vulnerabilities
+
+```
+npm run scan
+```
 
 ## Testing
 
