@@ -129,21 +129,21 @@ export class Database {
     return { artists, albums, tracks };
   }
 
-  public async addUser(user: CreateUserDto): Promise<User> {
-    const id = uuidv4();
-    const createdAt = Date.now();
-    const updatedAt = createdAt;
-    const version = 1;
-    const newUser: UserEntity = new UserEntity({
-      id,
-      createdAt,
-      updatedAt,
-      version,
-      ...user,
-    });
-    this.db.users.push(newUser);
-    return newUser;
-  }
+  // public async addUser(user: CreateUserDto): Promise<User> {
+  //   const id = uuidv4();
+  //   const createdAt = Date.now();
+  //   const updatedAt = createdAt;
+  //   const version = 1;
+  //   const newUser: UserEntity = new UserEntity({
+  //     id,
+  //     createdAt,
+  //     updatedAt,
+  //     version,
+  //     ...user,
+  //   });
+  //   this.db.users.push(newUser);
+  //   return newUser;
+  // }
 
   public async addArtist(artist: ArtistInput): Promise<Artist> {
     const id = uuidv4();
