@@ -1,37 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { db } from '../utils/database';
-import { AlbumEntity } from './entities/album.entity';
+import { PrismaService } from '../prisma/prisma.service';
+import { Album } from '@prisma/client';
 
 @Injectable()
 export class AlbumService {
-  // constructor(private readonly db: Database) {}
-  private readonly db;
-  constructor() {
-    this.db = db;
+  constructor(private prisma: PrismaService) {}
+
+  async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
+    return await this.prisma.album.create({ data: createAlbumDto });
   }
 
-  async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
-    return await this.db.addAlbum(createAlbumDto);
+  async findAll(): Promise<Album[]> {
+    return await this.prisma.album.findMany();
   }
 
-  async findAll(): Promise<AlbumEntity[]> {
-    return await this.db.getAlbums();
+  async findOne(id: string): Promise<Album> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+    if (!album) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    }
+    return album;
   }
 
-  async findOne(id: string): Promise<AlbumEntity> {
-    return await this.db.getAlbumById(id);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<Album> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+    if (!album) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    }
+    return await this.prisma.album.update({
+      where: { id },
+      data: updateAlbumDto,
+    });
   }
 
-  async update(
-    id: string,
-    updateAlbumDto: UpdateAlbumDto,
-  ): Promise<AlbumEntity> {
-    return await this.db.updateAlbum(id, updateAlbumDto);
-  }
-
-  async remove(id: string): Promise<boolean> {
-    return await this.db.deleteAlbum(id);
+  async remove(id: string): Promise<Album> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+    if (!album) {
+      throw new HttpException('Album not found', HttpStatus.NOT_FOUND);
+    }
+    return await this.prisma.album.delete({ where: { id } });
   }
 }

@@ -1,36 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { db } from '../utils/database';
 import { TrackEntity } from './entities/track.entity';
+import { PrismaService } from '../prisma/prisma.service';
+import { Track } from '@prisma/client';
 
 @Injectable()
 export class TrackService {
-  // constructor(private readonly db: Database) {}
-  private readonly db;
-  constructor() {
-    this.db = db;
-  }
-  async create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
-    return await this.db.addTrack(createTrackDto);
+  constructor(private prisma: PrismaService) {}
+
+  async create(createTrackDto: CreateTrackDto): Promise<Track> {
+    return await this.prisma.track.create({ data: createTrackDto });
   }
 
-  async findAll(): Promise<TrackEntity[]> {
-    return await this.db.getTracks();
+  async findAll(): Promise<Track[]> {
+    return await this.prisma.track.findMany();
   }
 
-  async findOne(id: string): Promise<TrackEntity> {
-    return await this.db.getTrackById(id);
+  async findOne(id: string): Promise<Track> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    if (!track) {
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    }
+    return track;
   }
 
   async update(
     id: string,
     updateTrackDto: UpdateTrackDto,
   ): Promise<TrackEntity> {
-    return await this.db.updateTrack(id, updateTrackDto);
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    if (!track) {
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    }
+    return await this.prisma.track.update({
+      where: { id },
+      data: updateTrackDto,
+    });
   }
 
-  async remove(id: string): Promise<boolean> {
-    return await this.db.deleteTrack(id);
+  async remove(id: string): Promise<Track> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    if (!track) {
+      throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
+    }
+    return await this.prisma.track.delete({ where: { id } });
   }
 }
