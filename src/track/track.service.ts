@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { TrackEntity } from './entities/track.entity';
 import { PrismaService } from '../prisma/prisma.service';
 import { Track } from '@prisma/client';
 
@@ -25,10 +24,7 @@ export class TrackService {
     return track;
   }
 
-  async update(
-    id: string,
-    updateTrackDto: UpdateTrackDto,
-  ): Promise<TrackEntity> {
+  async update(id: string, updateTrackDto: UpdateTrackDto): Promise<Track> {
     const track = await this.prisma.track.findUnique({ where: { id } });
     if (!track) {
       throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
