@@ -21,6 +21,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    platform: "linux/amd64"
     image: did82/nodejs2022q2-service
     container_name: nodejs2022Q2-service
     ports:
@@ -32,12 +33,18 @@ services:
     restart: always
     networks:
       - app-network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - app-network
 volumes:
   db:
     driver: local
 networks:
   app-network:
     driver: bridge
-
 
 

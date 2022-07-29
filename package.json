@@ -12,6 +12,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:migrate:dev": "npx prisma migrate dev && npx prisma db seed && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -29,7 +30,7 @@
     "@nestjs/mapped-types": "^1.0.1",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/swagger": "^5.2.1",
-    "bcrypt": "^5.0.1",
+    "@prisma/client": "^4.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "dotenv": "^16.0.1",
@@ -61,6 +62,8 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.2.5",
     "prettier": "^2.3.2",
+    "prettier-plugin-prisma": "^4.1.0",
+    "prisma": "^4.1.0",
     "source-map-support": "^0.5.20",
     "supertest": "^6.2.3",
     "ts-jest": "^27.0.3",
@@ -85,5 +88,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }

@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String @id @default(uuid())
+  login     String
+  password  String
+  version   Int    @default(1)
+  createdAt Int
+  updatedAt Int
+}
+
+model Artist {
+  id     String  @id @default(uuid())
+  name   String
+  grammy Boolean
+  Album  Album[]
+  Track  Track[]
+  favs   Favs?   @relation(fields: [favsId], references: [id], onDelete: Cascade)
+  favsId Int?
+}
+
+model Album {
+  id       String  @id @default(uuid())
+  name     String
+  year     Int
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  Track    Track[]
+  favs     Favs?   @relation(fields: [favsId], references: [id], onDelete: Cascade)
+  favsId   Int?
+}
+
+model Track {
+  id       String  @id @default(uuid())
+  name     String
+  duration Int
+  album    Album?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  albumId  String?
+  artist   Artist? @relation(fields: [artistId], references: [id], onDelete: SetNull)
+  artistId String?
+  favs     Favs?   @relation(fields: [favsId], references: [id], onDelete: Cascade)
+  favsId   Int?
+}
+
+model Favs {
+  id      Int      @id @default(autoincrement())
+  artists Artist[]
+  albums  Album[]
+  tracks  Track[]
+}
