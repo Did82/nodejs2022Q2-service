@@ -12,5 +12,6 @@ async function bootstrap() {
   const document = parseYaml();
   SwaggerModule.setup('api', app, <OpenAPIObject>document);
   await app.listen(port);
+  console.log(`🚀 Server running on port ${port}`);
 }
 bootstrap();
