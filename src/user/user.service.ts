@@ -1,17 +1,22 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { PrismaService } from '../prisma/prisma.service';
 import { plainToInstance } from 'class-transformer';
+import { hash, compare } from 'bcryptjs';
+
+const salt: number = parseInt(process.env.CRYPT_SALT, 10);
 
 @Injectable()
 export class UserService {
+  // private readonly logger = new Logger(UserService.name);
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
     const createdAt = Date.now();
     const updatedAt = createdAt;
+    createUserDto.password = await hash(createUserDto.password, salt);
     const newUser = await this.prisma.user.create({
       data: {
         ...createUserDto,
@@ -58,7 +63,11 @@ export class UserService {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    if (user.password !== updateUserDto.oldPassword) {
+    const isPasswordCorrect = await compare(
+      updateUserDto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordCorrect) {
       throw new HttpException(
         'Old password is incorrect',
         HttpStatus.FORBIDDEN,
@@ -66,6 +75,7 @@ export class UserService {
     }
     const updatedAt = Date.now();
     const newVersion = user.version + 1;
+    updateUserDto.password = await hash(updateUserDto.newPassword, salt);
     const newUser = await this.prisma.user.update({
       where: { id },
       data: {
