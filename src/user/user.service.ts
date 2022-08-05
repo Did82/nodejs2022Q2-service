@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
@@ -10,7 +10,6 @@ const salt: number = parseInt(process.env.CRYPT_SALT, 10);
 
 @Injectable()
 export class UserService {
-  // private readonly logger = new Logger(UserService.name);
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
