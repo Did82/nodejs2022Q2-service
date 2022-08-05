@@ -56,6 +56,21 @@ export class UserService {
     return user;
   }
 
+  async findOneByLogin(login: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { login },
+      select: {
+        id: true,
+        login: true,
+        password: true,
+      },
+    });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({
       where: { id },
